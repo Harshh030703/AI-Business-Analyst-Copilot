@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 from streamlit_option_menu import option_menu
+from components.header import hero
+from views.dashboard import show_dashboard
 
 from utils.data_processor import load_data, dataset_summary
 from utils.charts import create_chart
@@ -9,54 +11,37 @@ st.set_page_config(
     page_title="AI Business Analyst Copilot",
     page_icon="📊",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 # ---------------- Sidebar ---------------- #
 
-with st.sidebar:
-    selected = option_menu(
-        menu_title="Navigation",
-        options=[
-            "Dashboard",
-            "Upload Data",
-            "Visualization",
-            "AI Insights",
-            "Chat with Data"
-        ],
-        icons=[
-            "house",
-            "cloud-upload",
-            "bar-chart",
-            "robot",
-            "chat-dots"
-        ],
-        menu_icon="cast",
-        default_index=0,
-    )
+from components.sidebar import render_sidebar
 
-st.title("📊 AI Business Analyst Copilot")
+selected = render_sidebar()
 
 # ==========================================================
 # Dashboard
 # ==========================================================
 
+from components.header import hero
+from components.cards import metric_card
+from components.theme import load_theme
+
+load_theme()
+from views.dashboard import show_dashboard
+
 if selected == "Dashboard":
 
     if "df" in st.session_state:
 
-        df = st.session_state["df"]
-
-        c1, c2, c3 = st.columns(3)
-
-        c1.metric("Rows", df.shape[0])
-        c2.metric("Columns", df.shape[1])
-        c3.metric("Missing", int(df.isnull().sum().sum()))
-
-        st.success("Dataset Loaded Successfully ✅")
+        show_dashboard(st.session_state["df"])
 
     else:
 
-        st.info("Upload a CSV or Excel file to begin analysis.")
+        hero()
+
+        st.info("📂 Upload a dataset to begin analysis.")
 
 # ==========================================================
 # Upload
@@ -214,19 +199,31 @@ elif selected == "AI Insights":
 
     if "df" not in st.session_state:
 
-        st.warning("Please upload a dataset first.")
+        st.warning("📂 Please upload a dataset first.")
 
     else:
 
         df = st.session_state["df"]
 
-        st.success("Dataset Ready ✅")
+        st.success("✅ Dataset Ready")
 
-        if st.button("Generate AI Insights"):
+        st.info("""
+### What the AI analyzes
 
-            with st.spinner("Analyzing dataset..."):
+- 📈 Executive Summary
+- 📊 Key KPIs
+- ⚠️ Data Quality Issues
+- 📉 Trends & Patterns
+- 💼 Business Risks
+- 🚀 Business Opportunities
+- ✅ Recommendations
+""")
 
-                sample_data = df.head(50).to_string(index=False)
+        if st.button("🚀 Generate AI Insights", use_container_width=True):
+
+            with st.spinner("Analyzing dataset with Gemini AI..."):
+
+                sample_data = df.head(15).to_string(index=False)
 
                 prompt = f"""
 You are a Senior Business Analyst.
@@ -254,9 +251,65 @@ Dataset:
 {sample_data}
 """
 
-                response = ask_ai(prompt)
+                result = ask_ai(prompt)
 
-            st.markdown(response)
+            # ----------------------------
+            # Success
+            # ----------------------------
+
+            if result["success"]:
+
+                st.success("✅ AI Analysis Generated Successfully")
+
+                st.markdown(result["message"])
+
+            # ----------------------------
+            # Gemini Unavailable
+            # ----------------------------
+
+            else:
+
+                st.warning(result["message"])
+
+                st.divider()
+
+                st.subheader("📊 Dataset Summary")
+
+                c1, c2, c3, c4 = st.columns(4)
+
+                with c1:
+                    st.metric("Rows", len(df))
+
+                with c2:
+                    st.metric("Columns", len(df.columns))
+
+                with c3:
+                    st.metric("Missing", int(df.isna().sum().sum()))
+
+                with c4:
+                    st.metric("Duplicates", int(df.duplicated().sum()))
+
+                st.divider()
+
+                st.subheader("📋 Statistical Summary")
+
+                st.dataframe(
+                    df.describe(include="all").transpose(),
+                    use_container_width=True
+                )
+
+                st.info("""
+### Dashboard Features Still Available
+
+Even though AI Insights are temporarily unavailable, you can still use:
+
+- ✅ Interactive Dashboard
+- ✅ KPI Cards
+- ✅ Dataset Statistics
+- ✅ Visualizations
+- ✅ Data Quality Analysis
+- ✅ PDF Export
+""")
 
 
 # ==========================================================
@@ -295,7 +348,7 @@ Columns:
 
 Sample Data:
 
-{df.head(30).to_string(index=False)}
+{df.head(10).to_string(index=False)}
 """
 
                 prompt = f"""
@@ -320,4 +373,6 @@ Question:
             st.success("Answer Generated")
 
             st.markdown(answer)
-            
+from components.footer import footer
+
+footer()
