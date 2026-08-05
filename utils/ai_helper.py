@@ -1,11 +1,23 @@
 import os
 
+import streamlit as st
+
 from dotenv import load_dotenv
 from google import genai
 
 load_dotenv()
 
-API_KEY = os.getenv("GOOGLE_API_KEY")
+API_KEY = None
+
+# Streamlit Cloud
+try:
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
+except Exception:
+    pass
+
+# Local .env
+if not API_KEY:
+    API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 def ask_ai(prompt: str):

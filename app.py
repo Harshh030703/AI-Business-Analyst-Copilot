@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_option_menu import option_menu
 from components.header import hero
 from views.dashboard import show_dashboard
 
@@ -19,6 +18,7 @@ st.set_page_config(
 from components.sidebar import render_sidebar
 
 selected = render_sidebar()
+st.sidebar.title("📊 AI Business Analyst")
 
 # ==========================================================
 # Dashboard
