@@ -18,14 +18,13 @@ st.set_page_config(
 from components.sidebar import render_sidebar
 
 selected = render_sidebar()
-st.sidebar.title("📊 AI Business Analyst")
+
 
 # ==========================================================
 # Dashboard
 # ==========================================================
 
 from components.header import hero
-from components.cards import metric_card
 from components.theme import load_theme
 
 load_theme()
@@ -368,11 +367,17 @@ Question:
 {question}
 """
 
-                answer = ask_ai(prompt)
+                result = ask_ai(prompt)
 
-            st.success("Answer Generated")
+if result["success"]:
 
-            st.markdown(answer)
+    st.success("Answer Generated")
+
+    st.markdown(result["message"])
+
+else:
+
+    st.warning(result["message"])
 from components.footer import footer
 
 footer()
