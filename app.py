@@ -315,6 +315,7 @@ Even though AI Insights are temporarily unavailable, you can still use:
 # Chat
 # ==========================================================
 
+
 elif selected == "Chat with Data":
 
     from utils.ai_helper import ask_ai
@@ -323,7 +324,7 @@ elif selected == "Chat with Data":
 
     if "df" not in st.session_state:
 
-        st.warning("Please upload a dataset first.")
+        st.warning("📂 Please upload a dataset first.")
 
     else:
 
@@ -333,11 +334,17 @@ elif selected == "Chat with Data":
             "Ask a question about your dataset"
         )
 
-        if st.button("Ask AI"):
+        if st.button("💬 Ask AI", use_container_width=True):
 
-            with st.spinner("Analyzing your data..."):
+            if question.strip() == "":
 
-                dataset_info = f"""
+                st.warning("Please enter a question.")
+
+            else:
+
+                with st.spinner("Analyzing your data..."):
+
+                    dataset_info = f"""
 Dataset Shape:
 Rows: {df.shape[0]}
 Columns: {df.shape[1]}
@@ -350,7 +357,7 @@ Sample Data:
 {df.head(10).to_string(index=False)}
 """
 
-                prompt = f"""
+                    prompt = f"""
 You are an expert Business Analyst.
 
 Answer ONLY using the dataset below.
@@ -367,17 +374,25 @@ Question:
 {question}
 """
 
-                result = ask_ai(prompt)
+                    result = ask_ai(prompt)
 
-if result["success"]:
+                # ---------------------------------
+                # Success
+                # ---------------------------------
 
-    st.success("Answer Generated")
+                if result["success"]:
 
-    st.markdown(result["message"])
+                    st.success("✅ Answer Generated")
 
-else:
+                    st.markdown(result["message"])
 
-    st.warning(result["message"])
+                # ---------------------------------
+                # AI Unavailable
+                # ---------------------------------
+
+                else:
+
+                    st.warning(result["message"])
 from components.footer import footer
 
 footer()

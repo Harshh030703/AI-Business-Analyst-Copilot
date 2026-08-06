@@ -227,3 +227,45 @@ data/*.xlsx
 
 # Windows
 Thumbs.db
+# ==============================
+# AI Business Analyst Copilot
+# ==============================
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# User uploaded datasets
+uploads/*
+!uploads/.gitkeep
+
+# Generated reports
+reports/*
+!reports/.gitkeep
+
+# Local datasets
+data/*.csv
+data/*.xlsx
+data/*.xls
+
+# IDE settings
+.vscode/
+.idea/
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini

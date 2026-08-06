@@ -1,7 +1,5 @@
 import os
-
 import streamlit as st
-
 from dotenv import load_dotenv
 from google import genai
 
@@ -23,7 +21,6 @@ if not API_KEY:
 def ask_ai(prompt: str):
 
     if not API_KEY:
-
         return {
             "success": False,
             "message": "⚠️ Google API Key not found."
@@ -31,12 +28,10 @@ def ask_ai(prompt: str):
 
     try:
 
-        client = genai.Client(
-            api_key=API_KEY
-        )
+        client = genai.Client(api_key=API_KEY)
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.5-flash",   # <-- Updated model
             contents=prompt
         )
 
@@ -49,55 +44,33 @@ def ask_ai(prompt: str):
 
         error = str(e)
 
-        if (
-            "429" in error
-            or "RESOURCE_EXHAUSTED" in error
-            or "quota" in error.lower()
-        ):
+        print(error)
 
+        if "RESOURCE_EXHAUSTED" in error or "429" in error:
             return {
-
                 "success": False,
-
-                "message": """
-## ⚠️ AI Insights Temporarily Unavailable
-
-The Gemini API quota has been exhausted.
-
-The remaining features continue to work normally:
-
-- ✅ Dashboard
-- ✅ KPI Cards
-- ✅ Data Quality Analysis
-- ✅ Interactive Charts
-- ✅ Visualizations
-- ✅ PDF Export
-
-Please try again later or configure another API key.
-"""
-
+                "message": "⚠️ Gemini quota exceeded. Please try again later."
             }
 
-        if "503" in error:
-
+        elif "INVALID_ARGUMENT" in error:
             return {
-
                 "success": False,
+                "message": "⚠️ Invalid Gemini request."
+            }
 
-                "message": """
-## ⚠️ AI Service Busy
+        elif "API_KEY_INVALID" in error:
+            return {
+                "success": False,
+                "message": "⚠️ Invalid Google API Key."
+            }
 
-Gemini is currently experiencing high demand.
-
-Please try again later.
-"""
-
+        elif "503" in error:
+            return {
+                "success": False,
+                "message": "⚠️ Gemini service is temporarily unavailable."
             }
 
         return {
-
             "success": False,
-
-            "message": f"Unexpected error:\n\n{error}"
-
+            "message": error
         }
